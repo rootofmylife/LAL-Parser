@@ -9,10 +9,10 @@ This is a PyTorch implementation of the parser described in ["Rethinking Self-At
 2. [Pre-trained models](#Pre-trained-models)
 3. [Training](#Training)
 4. [Evaluation](#Evaluation)
-4. [Inference](#Inference)
-5. [Label Attention](#Label-Attention)
-6. [Citation](#Citation)
-7. [Credits](#Credits)
+5. [Inference](#Inference)
+6. [Label Attention](#Label-Attention)
+7. [Citation](#Citation)
+8. [Credits](#Credits)
 
 ## Requirements
 
