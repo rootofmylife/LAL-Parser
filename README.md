@@ -1,11 +1,14 @@
 # Neural Adobe-UCSD Parser
 
+# This repo is reused for Vietnamese language. Some part will be different from [original repo](https://github.com/KhalilMrini/LAL-Parser). Use it with carefully
+
 This is a PyTorch implementation of the parser described in ["Rethinking Self-Attention: Towards Interpretability in Neural Parsing" (Mrini et al., 2020)](https://arxiv.org/abs/1911.03875), to appear at EMNLP 2020 Findings.
 
 ## Contents
 1. [Requirements](#Requirements)
 2. [Pre-trained models](#Pre-trained-models)
 3. [Training](#Training)
+4. [Evaluation](#Evaluation)
 4. [Inference](#Inference)
 5. [Label Attention](#Label-Attention)
 6. [Citation](#Citation)
@@ -67,7 +70,7 @@ Argument | Description | Default
 
 Additional arguments are available for other hyperparameters; see `make_hparams()` in `src/main.py`. These can be specified on the command line, such as `--num-layers 2` (for numerical parameters), `--use-tags` (for boolean parameters that default to False), or `--no-partitioned` (for boolean parameters that default to True).
 
-## Evaluation Instructions
+## Evaluation
 
 A saved model can be evaluated on a test corpus using the command `python src/main.py test ...` with the following arguments:
 
