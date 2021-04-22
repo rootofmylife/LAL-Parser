@@ -2,13 +2,11 @@ import argparse
 import itertools
 import os.path
 import time
-import uuid
 
 import torch
 import torch.optim.lr_scheduler
 
 import numpy as np
-import math
 import evaluate
 import trees
 import vocabulary
@@ -16,14 +14,10 @@ import makehp
 import KM_parser
 from dep_reader import CoNLLXReader
 import dep_eval
-import utils
-import json
 tokens = KM_parser
 import nltk
 from nltk import word_tokenize, sent_tokenize
 from tqdm import tqdm
-
-uid = uuid.uuid4().hex[:6]
 
 REVERSE_TOKEN_MAPPING = dict([(value, key) for key, value in tokens.BERT_TOKEN_MAPPING.items()])
 
