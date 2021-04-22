@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 python src_joint/main.py train \
  --model-path-base models/joint_xlnet_clean_large_3_layers_no_resdrop_lambda \
-  --epochs 100 \
+ --epochs 100 \
  --use-xlnet \
  --use-tags \
  --const-lada 0.5 \
