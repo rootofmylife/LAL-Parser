@@ -1,8 +1,8 @@
 # Neural Adobe-UCSD Parser
 
-# This repo is reused for Vietnamese language. Some part will be different from [original repo](https://github.com/KhalilMrini/LAL-Parser). Use it with carefully
+# This repo is modified for Vietnamese language. Some part will be different from [original repo](https://github.com/KhalilMrini/LAL-Parser). Use it with carefully
 
-This is a PyTorch implementation of the parser described in ["Rethinking Self-Attention: Towards Interpretability in Neural Parsing" (Mrini et al., 2020)](https://arxiv.org/abs/1911.03875), to appear at EMNLP 2020 Findings.
+~~This is a PyTorch implementation of the parser described in ["Rethinking Self-Attention: Towards Interpretability in Neural Parsing" (Mrini et al., 2020)](https://arxiv.org/abs/1911.03875), to appear at EMNLP 2020 Findings.~~
 
 ## Contents
 1. [Requirements](#Requirements)
@@ -17,7 +17,7 @@ This is a PyTorch implementation of the parser described in ["Rethinking Self-At
 ## Requirements
 
 * Python 3.6 or higher.
-* The Python package requirements can be installed through the `requirements.sh` file.
+* The Python package requirements can be installed through the `requirements.txt` file.
 * Run `make` in ./EVALB. 
 
 ## Pre-trained models
@@ -32,7 +32,7 @@ The English PTB data files for Dependency Parsing and Constituency Parsing are i
 
 We provide the training script in `best_parser_training_script.sh`.
 
-Check the function `make_hparams` in `src_joint/main.py` for hyperparameters specific to the Label Attention Layer. For more training and evaluation instructions, see [the HPSG parser repository](https://github.com/DoodleJZ/HPSG-Neural-Parser).
+Check the function `make_hparams` in `src_joint/main.py` for hyperparameters specific to the Label Attention Layer. For more training and evaluation instructions, see below.
 
 ### Training Instructions get from [the HPSG parser repository](https://github.com/DoodleJZ/HPSG-Neural-Parser)
 
@@ -159,4 +159,4 @@ If you use the Neural Adobe-UCSD Parser, please cite our [paper](https://arxiv.o
 
 ## Credits
 
-The code in this repository, the dataset and portions of this README are based on [the Self-Attentive Parser](https://github.com/nikitakit/self-attentive-parser) and [the HPSG Parser](https://github.com/DoodleJZ/HPSG-Neural-Parser).
+The code in this repository, the dataset and portions of this README are based on [the Self-Attentive Parser](https://github.com/nikitakit/self-attentive-parser) and [the HPSG Parser](https://github.com/DoodleJZ/HPSG-Neural-Parser) and [the LAL Parser](https://github.com/KhalilMrini/LAL-Parser).
