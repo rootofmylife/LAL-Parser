@@ -115,3 +115,7 @@ dmypy.json
 
 *.txt
 EVALB/evalb
+
+vtb_train_3.3.0.clean
+vtb_dev_3.3.0.clean
+vtb_test_3.3.0.clean
