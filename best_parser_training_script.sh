@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-python src_joint/main.py train \
+python3 src_joint/main.py train \
  --model-path-base models/hpsg_vn \
  --epochs 100 \
  --use-xlnet \
