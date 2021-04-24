@@ -5,8 +5,11 @@ Sub_Head = "<H>"
 No_Head = "<N>"
 Htype = 1
 Ntype = 0
+
+
 class TreebankNode(object):
     pass
+
 
 class InternalTreebankNode(TreebankNode):
     def __init__(self, label, children):
@@ -31,10 +34,9 @@ class InternalTreebankNode(TreebankNode):
                 flag = 1
 
         for child in self.children:
-            if child.head!=self.head:
+            if child.head != self.head:
                 if child.father != self.head:
                     self.cun += 1
-
 
     def linearize(self):
         return "({} {})".format(
@@ -64,33 +66,35 @@ class InternalTreebankNode(TreebankNode):
             sub_father |= set([child.father])
 
         for child in tree.children:
-            #not in sub tree
+            # not in sub tree
             if (child.father in sub_head and child.father != self.head) or (child.head in sub_father and child.head != self.head):
                 sub_r = child.father
                 if child.head in sub_father:
                     sub_r = child.head
                 if sub_r not in al_make:
                     al_make |= set([sub_r])
-                else :
+                else:
                     continue
                 sub_children = []
                 for sub_child in tree.children:
                     if sub_child.father == sub_r or sub_child.head == sub_r:
                         if len(sub_children) > 0:
-                            assert sub_children[-1].right == sub_child.left #contiune span
-                        sub_children.append(sub_child.convert(index = index))
+                            # contiune span
+                            assert sub_children[-1].right == sub_child.left
+                        sub_children.append(sub_child.convert(index=index))
                         index = sub_children[-1].right
 
                 assert len(sub_children) > 1
 
-                sub_node = InternalParseNode(tuple([Sub_Head]), sub_children, nocache=nocache)
+                sub_node = InternalParseNode(
+                    tuple([Sub_Head]), sub_children, nocache=nocache)
                 if len(children) > 0:
                     assert children[-1].right == sub_node.left  # contiune span
                 children.append(sub_node)
             else:
                 if len(children) > 0:
                     assert children[-1].right == child.left  # contiune span
-                children.append(child.convert(index = index))
+                children.append(child.convert(index=index))
                 index = children[-1].right
 
         return InternalParseNode(tuple(sublabels), children, nocache=nocache)
@@ -117,8 +121,10 @@ class LeafTreebankNode(TreebankNode):
     def convert(self, index=0):
         return LeafParseNode(index, self.tag, self.word, self.father, self.type)
 
+
 class ParseNode(object):
     pass
+
 
 class InternalParseNode(ParseNode):
     def __init__(self, label, children, nocache=False):
@@ -148,8 +154,7 @@ class InternalParseNode(ParseNode):
                 self.father = child.father
                 self.type = child.type
                 self.head = child.head
-                flag =1
-
+                flag = 1
 
         self.cun_w = 0
         for child in self.children:
@@ -208,6 +213,7 @@ class InternalParseNode(ParseNode):
             if left < child.left < right
         ]
 
+
 class LeafParseNode(ParseNode):
     def __init__(self, index, tag, word, father, type):
         assert isinstance(index, int)
@@ -234,14 +240,16 @@ class LeafParseNode(ParseNode):
     def convert(self):
         return LeafTreebankNode(self.tag, self.word, self.head, self.father, self.type)
 
-def load_trees(path, heads = None, types = None, wordss = None, strip_top=True):
+
+def load_trees(path, heads=None, types=None, wordss=None, strip_top=True):
     with open(path) as infile:
         treebank = infile.read()
 
     tokens = treebank.replace("(", " ( ").replace(")", " ) ").split()
 
-    cun_word = 0 #without root
+    cun_word = 0  # without root
     cun_sent = 0
+
     def helper(index, flag_sent):
         nonlocal cun_sent
         nonlocal cun_word
@@ -258,17 +266,19 @@ def load_trees(path, heads = None, types = None, wordss = None, strip_top=True):
             index += 1
 
             if tokens[index] == "(":
-                children, index = helper(index, flag_sent = 0)
-                if len(children) > 0 :
+                children, index = helper(index, flag_sent=0)
+                if len(children) > 0:
                     tr = InternalTreebankNode(label, children)
                     trees.append(tr)
             else:
                 word = tokens[index]
                 index += 1
                 if label != '-NONE-':
-                    trees.append(LeafTreebankNode(label, word, head = cun_word + 1, father=heads[cun_sent][cun_word], type = types[cun_sent][cun_word]))
-                    if cun_sent<0:
-                        print(cun_sent, cun_word + 1, word, heads[cun_sent][cun_word], types[cun_sent][cun_word])
+                    trees.append(LeafTreebankNode(label, word, head=cun_word + 1,
+                                 father=heads[cun_sent][cun_word], type=types[cun_sent][cun_word]))
+                    if cun_sent < 0:
+                        print(cun_sent, cun_word + 1, word,
+                              heads[cun_sent][cun_word], types[cun_sent][cun_word])
                     cun_word += 1
 
             while paren_count > 0:
@@ -276,13 +286,13 @@ def load_trees(path, heads = None, types = None, wordss = None, strip_top=True):
                 index += 1
                 paren_count -= 1
 
-            if flag_sent == 1 :
+            if flag_sent == 1:
                 cun_sent += 1
                 cun_word = 0
 
         return trees, index
 
-    trees, index = helper(0, flag_sent = 1)
+    trees, index = helper(0, flag_sent=1)
     assert index == len(tokens)
     assert len(trees) == cun_sent
 
@@ -320,4 +330,3 @@ def load_trees(path, heads = None, types = None, wordss = None, strip_top=True):
         new_trees.append(new_tree)
 
     return new_trees
-

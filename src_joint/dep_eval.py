@@ -3,6 +3,7 @@ __author__ = 'max'
 import re
 import numpy as np
 
+
 def is_uni_punctuation(word):
     match = re.match("^[^\w\s]+$]", word, flags=re.UNICODE)
     return match is not None
@@ -12,10 +13,10 @@ def is_punctuation(word, pos, punct_set=None):
     if punct_set is None:
         return is_uni_punctuation(word)
     else:
-        return pos in punct_set or pos == 'PU' # for chinese
+        return pos in punct_set or pos == 'PU'  # for chinese
 
 
-def eval(batch_size, words, postags, heads_pred, types_pred, heads, types,lengths,
+def eval(batch_size, words, postags, heads_pred, types_pred, heads, types, lengths,
          punct_set=None, symbolic_root=False, symbolic_end=False):
     ucorr = 0.
     lcorr = 0.
@@ -79,4 +80,3 @@ def eval(batch_size, words, postags, heads_pred, types_pred, heads, types,length
     return (ucorr, lcorr, total, ucomplete_match, lcomplete_match), \
            (ucorr_nopunc, lcorr_nopunc, total_nopunc, ucomplete_match_nopunc, lcomplete_match_nopunc), \
            (corr_root, total_root), batch_size
-

@@ -6,6 +6,7 @@ import tempfile
 
 import trees
 
+
 class FScore(object):
     def __init__(self, recall, precision, fscore):
         self.recall = recall
@@ -16,11 +17,13 @@ class FScore(object):
         return "(Recall={:.2f}, Precision={:.2f}, FScore={:.2f})".format(
             self.recall, self.precision, self.fscore)
 
+
 def evalb(evalb_dir, gold_trees, predicted_trees, ref_gold_path=None):
     assert os.path.exists(evalb_dir)
     evalb_program_path = os.path.join(evalb_dir, "evalb")
     evalb_spmrl_program_path = os.path.join(evalb_dir, "evalb_spmrl")
-    assert os.path.exists(evalb_program_path) or os.path.exists(evalb_spmrl_program_path)
+    assert os.path.exists(evalb_program_path) or os.path.exists(
+        evalb_spmrl_program_path)
 
     if os.path.exists(evalb_program_path):
         #evalb_param_path = os.path.join(evalb_dir, "COLLINS.prm")

@@ -1,3 +1,6 @@
+from tqdm import tqdm
+from nltk import word_tokenize, sent_tokenize
+import nltk
 import argparse
 import itertools
 import os.path
@@ -15,17 +18,17 @@ import KM_parser
 from dep_reader import CoNLLXReader
 import dep_eval
 tokens = KM_parser
-import nltk
-from nltk import word_tokenize, sent_tokenize
-from tqdm import tqdm
 
-REVERSE_TOKEN_MAPPING = dict([(value, key) for key, value in tokens.BERT_TOKEN_MAPPING.items()])
+REVERSE_TOKEN_MAPPING = dict(
+    [(value, key) for key, value in tokens.BERT_TOKEN_MAPPING.items()])
+
 
 def torch_load(load_path):
     if KM_parser.use_cuda:
         return torch.load(load_path)
     else:
         return torch.load(load_path, map_location=lambda storage, location: storage)
+
 
 def format_elapsed(start_time):
     elapsed_time = int(time.time() - start_time)
@@ -37,24 +40,25 @@ def format_elapsed(start_time):
         elapsed_string = "{}d{}".format(days, elapsed_string)
     return elapsed_string
 
+
 def make_hparams():
     return makehp.HParams(
-        max_len_train=0, # no length limit
-        max_len_dev=0, # no length limit
+        max_len_train=0,  # no length limit
+        max_len_dev=0,  # no length limit
 
         sentence_max_len=300,
 
         learning_rate=0.0008,
         learning_rate_warmup_steps=160,
-        clip_grad_norm=0., #no clipping
-        step_decay=True, # note that disabling step decay is not implemented
+        clip_grad_norm=0.,  # no clipping
+        step_decay=True,  # note that disabling step decay is not implemented
         step_decay_factor=0.5,
         step_decay_patience=5,
 
         partitioned=True,
 
-        use_cat = False,
-        const_lada = 0.5,
+        use_cat=False,
+        const_lada=0.5,
 
         num_layers=12,
         d_model=1024,
@@ -62,17 +66,17 @@ def make_hparams():
         d_kv=64,
         d_ff=2048,
         d_label_hidden=250,
-        d_biaffine = 1024,
-        
+        d_biaffine=1024,
+
         # Label Attention Layer
-        use_lal=True, # Whether the LAL is used at all
-        lal_d_kv=64, # Dimension of Key and Query Vectors in the LAL
-        lal_d_proj=64, # Dimension of the output vector from each label attention head
-        lal_resdrop=True, # True means the LAL uses Residual Dropout
-        lal_pwff=True, # True means the LAL has a Position-wise Feed-forward Layer
-        lal_q_as_matrix=False, # False means the LAL uses learned query vectors
-        lal_partitioned=True, # Partitioned as per the Berkeley Self-Attentive Parser
-        lal_combine_as_self=False, # False means the LAL uses concatenation
+        use_lal=True,  # Whether the LAL is used at all
+        lal_d_kv=64,  # Dimension of Key and Query Vectors in the LAL
+        lal_d_proj=64,  # Dimension of the output vector from each label attention head
+        lal_resdrop=True,  # True means the LAL uses Residual Dropout
+        lal_pwff=True,  # True means the LAL has a Position-wise Feed-forward Layer
+        lal_q_as_matrix=False,  # False means the LAL uses learned query vectors
+        lal_partitioned=True,  # Partitioned as per the Berkeley Self-Attentive Parser
+        lal_combine_as_self=False,  # False means the LAL uses concatenation
 
         attention_dropout=0.2,
         embedding_dropout=0.2,
@@ -81,29 +85,29 @@ def make_hparams():
 
         use_tags=False,
         use_words=False,
-        use_elmo = False,
+        use_elmo=False,
         use_bert=False,
-        use_xlnet = False,
-        use_roberta = False,
+        use_xlnet=False,
+        use_roberta=False,
         use_bert_only=False,
         use_chars_lstm=False,
 
-        dataset = 'ptb',
+        dataset='ptb',
 
-        model_name = "joint",
-        embedding_type = 'random',
-        #['glove','sskip','random']
-        embedding_path = "/data/glove.gz",
+        model_name="joint",
+        embedding_type='random',
+        # ['glove','sskip','random']
+        embedding_path="/data/glove.gz",
         punctuation='.' '``' "''" ':' ',',
 
-        d_char_emb = 64, # A larger value may be better for use_chars_lstm
+        d_char_emb=64,  # A larger value may be better for use_chars_lstm
 
         tag_emb_dropout=0.2,
         word_emb_dropout=0.4,
         morpho_emb_dropout=0.2,
         timing_dropout=0.0,
         char_lstm_input_dropout=0.2,
-        elmo_dropout=0.5, # Note that this semi-stacks with morpho_emb_dropout!
+        elmo_dropout=0.5,  # Note that this semi-stacks with morpho_emb_dropout!
 
         bert_model="bert-large-uncased",
         bert_do_lower_case=True,
@@ -113,7 +117,8 @@ def make_hparams():
         pad_left=False,
         roberta_model="roberta-large",
         roberta_do_lower_case=False,
-        )
+    )
+
 
 def count_wh(str, data, heads, types):
     cun_w = 0
@@ -126,6 +131,7 @@ def count_wh(str, data, heads, types):
                 nodes.extend(reversed(node.children))
 
     print("total wrong head of :", str, "is", cun_w)
+
 
 def run_train(args, hparams):
     if args.numpy_seed is not None:
@@ -165,7 +171,6 @@ def run_train(args, hparams):
     dep_dev_reader = CoNLLXReader(dep_dev_path)
     print('Reading dependency parsing data from %s' % dep_dev_path)
 
-
     counter = 0
     dep_sentences = []
     dep_data = []
@@ -194,7 +199,7 @@ def run_train(args, hparams):
 
     dep_dev_data = []
     dev_inst = dep_dev_reader.getNext()
-    dep_dev_headid = np.zeros([3000,300],dtype=int)
+    dep_dev_headid = np.zeros([3000, 300], dtype=int)
     dep_dev_type = []
     dep_dev_word = []
     dep_dev_pos = []
@@ -202,12 +207,13 @@ def run_train(args, hparams):
     cun = 0
     while dev_inst is not None:
         inst_size = dev_inst.length()
-        if hparams.max_len_dev > 0 and inst_size - 1> hparams.max_len_dev:
+        if hparams.max_len_dev > 0 and inst_size - 1 > hparams.max_len_dev:
             dev_inst = dep_dev_reader.getNext()
             continue
         dep_dev_lengs[cun] = inst_size
         sent = dev_inst.sentence
-        dep_dev_data.append((sent.words, dev_inst.postags, dev_inst.heads, dev_inst.types))
+        dep_dev_data.append((sent.words, dev_inst.postags,
+                            dev_inst.heads, dev_inst.types))
         for i in range(inst_size):
             dep_dev_headid[cun][i] = dev_inst.heads[i]
 
@@ -219,19 +225,21 @@ def run_train(args, hparams):
         cun = cun + 1
     dep_dev_reader.close()
 
-
     print("Loading training trees from {}...".format(train_path))
-    train_treebank = trees.load_trees(train_path, dep_heads, dep_types, dep_sentences)
+    train_treebank = trees.load_trees(
+        train_path, dep_heads, dep_types, dep_sentences)
     if hparams.max_len_train > 0:
-        train_treebank = [tree for tree in train_treebank if len(list(tree.leaves())) <= hparams.max_len_train]
+        train_treebank = [tree for tree in train_treebank if len(
+            list(tree.leaves())) <= hparams.max_len_train]
     print("Loaded {:,} training examples.".format(len(train_treebank)))
 
     print("Loading development trees from {}...".format(dev_path))
-    dev_treebank = trees.load_trees(dev_path, dep_dev_headid, dep_dev_type, dep_dev_word)
+    dev_treebank = trees.load_trees(
+        dev_path, dep_dev_headid, dep_dev_type, dep_dev_word)
     if hparams.max_len_dev > 0:
-        dev_treebank = [tree for tree in dev_treebank if len(list(tree.leaves())) <= hparams.max_len_dev]
+        dev_treebank = [tree for tree in dev_treebank if len(
+            list(tree.leaves())) <= hparams.max_len_dev]
     print("Loaded {:,} development examples.".format(len(dev_treebank)))
-
 
     print("Processing trees for training...")
     train_parse = [tree.convert() for tree in train_treebank]
@@ -264,13 +272,13 @@ def run_train(args, hparams):
     for i, tree in enumerate(train_parse):
 
         const_sentences = [leaf.word for leaf in tree.leaves()]
-        assert len(const_sentences)  == len(dep_sentences[i])
+        assert len(const_sentences) == len(dep_sentences[i])
         nodes = [tree]
         while nodes:
             node = nodes.pop()
             if isinstance(node, trees.InternalParseNode):
                 label_vocab.index(node.label)
-                if node.type is not KM_parser.ROOT:#not include root type
+                if node.type is not KM_parser.ROOT:  # not include root type
                     type_vocab.index(node.type)
                 nodes.extend(reversed(node.children))
             else:
@@ -281,7 +289,7 @@ def run_train(args, hparams):
 
     char_vocab = vocabulary.Vocabulary()
 
-    #char_vocab.index(tokens.CHAR_PAD)
+    # char_vocab.index(tokens.CHAR_PAD)
 
     # If codepoints are small (e.g. Latin alphabet), index by codepoint directly
     highest_codepoint = max(ord(char) for char in char_set)
@@ -327,14 +335,14 @@ def run_train(args, hparams):
         print_vocabulary("Char", char_vocab)
         print_vocabulary("Type", type_vocab)
 
-
     print("Initializing model...")
 
     load_path = None
     if load_path is not None:
         print(f"Loading parameters from {load_path}")
         info = torch_load(load_path)
-        parser = KM_parser.ChartParser.from_spec(info['spec'], info['state_dict'])
+        parser = KM_parser.ChartParser.from_spec(
+            info['spec'], info['state_dict'])
     else:
         parser = KM_parser.ChartParser(
             tag_vocab,
@@ -346,8 +354,10 @@ def run_train(args, hparams):
         )
 
     print("Initializing optimizer...")
-    trainable_parameters = [param for param in parser.parameters() if param.requires_grad]
-    trainer = torch.optim.Adam(trainable_parameters, lr=1., betas=(0.9, 0.98), eps=1e-9)
+    trainable_parameters = [
+        param for param in parser.parameters() if param.requires_grad]
+    trainer = torch.optim.Adam(
+        trainable_parameters, lr=1., betas=(0.9, 0.98), eps=1e-9)
     if load_path is not None:
         trainer.load_state_dict(info['trainer'])
 
@@ -364,6 +374,7 @@ def run_train(args, hparams):
         patience=hparams.step_decay_patience,
         verbose=True,
     )
+
     def schedule_lr(iteration):
         iteration = iteration + 1
         if iteration <= hparams.learning_rate_warmup_steps:
@@ -371,7 +382,6 @@ def run_train(args, hparams):
 
     clippable_parameters = trainable_parameters
     grad_clip_threshold = np.inf if hparams.clip_grad_norm == 0 else hparams.clip_grad_norm
-
 
     print("Training...")
     total_processed = 0
@@ -395,15 +405,18 @@ def run_train(args, hparams):
         dev_predicted = []
 
         for dev_start_index in range(0, len(dev_treebank), args.eval_batch_size):
-            subbatch_trees = dev_treebank[dev_start_index:dev_start_index+args.eval_batch_size]
-            subbatch_sentences = [[(leaf.tag, leaf.word) for leaf in tree.leaves()] for tree in subbatch_trees]
+            subbatch_trees = dev_treebank[dev_start_index:
+                                          dev_start_index+args.eval_batch_size]
+            subbatch_sentences = [
+                [(leaf.tag, leaf.word) for leaf in tree.leaves()] for tree in subbatch_trees]
 
-            predicted,  _,= parser.parse_batch(subbatch_sentences)
+            predicted,  _, = parser.parse_batch(subbatch_sentences)
             del _
 
             dev_predicted.extend([p.convert() for p in predicted])
 
-        dev_fscore = evaluate.evalb(args.evalb_dir, dev_treebank, dev_predicted)
+        dev_fscore = evaluate.evalb(
+            args.evalb_dir, dev_treebank, dev_predicted)
 
         print(
             "dev-fscore {} "
@@ -415,8 +428,10 @@ def run_train(args, hparams):
             )
         )
 
-        dev_pred_head = [[leaf.father for leaf in tree.leaves()] for tree in dev_predicted]
-        dev_pred_type = [[leaf.type for leaf in tree.leaves()] for tree in dev_predicted]
+        dev_pred_head = [[leaf.father for leaf in tree.leaves()]
+                         for tree in dev_predicted]
+        dev_pred_type = [[leaf.type for leaf in tree.leaves()]
+                         for tree in dev_predicted]
         assert len(dev_pred_head) == len(dev_pred_type)
         assert len(dev_pred_type) == len(dep_dev_type)
         stats, stats_nopunc, stats_root, num_inst = dep_eval.eval(len(dev_pred_head), dep_dev_word, dep_dev_pos,
@@ -430,7 +445,8 @@ def run_train(args, hparams):
         dev_total_inst = num_inst
         print(
             'W. Punct: ucorr: %d, lcorr: %d, total: %d, uas: %.2f%%, las: %.2f%%, ucm: %.2f%%, lcm: %.2f%%' % (
-                dev_ucorr, dev_lcorr, dev_total, dev_ucorr * 100 / dev_total, dev_lcorr * 100 / dev_total,
+                dev_ucorr, dev_lcorr, dev_total, dev_ucorr *
+                100 / dev_total, dev_lcorr * 100 / dev_total,
                 dev_ucomlpete * 100 / dev_total_inst, dev_lcomplete * 100 / dev_total_inst))
         print(
             'Wo Punct: ucorr: %d, lcorr: %d, total: %d, uas: %.2f%%, las: %.2f%%, ucm: %.2f%%, lcm: %.2f%%' % (
@@ -444,7 +460,7 @@ def run_train(args, hparams):
         dev_uas = dev_ucorr_nopunc * 100 / dev_total_nopunc
         dev_las = dev_lcorr_nopunc * 100 / dev_total_nopunc
 
-        if dev_fscore.fscore + dev_las > best_dev_score :
+        if dev_fscore.fscore + dev_las > best_dev_score:
             if best_model_path is not None:
                 extensions = [".pt"]
                 for ext in extensions:
@@ -455,19 +471,18 @@ def run_train(args, hparams):
 
             best_dev_score = dev_fscore.fscore + dev_las
             best_model_path = "{}_best_dev={:.2f}_devuas={:.2f}_devlas={:.2f}".format(
-                args.model_path_base, dev_fscore.fscore, dev_uas,dev_las)
+                args.model_path_base, dev_fscore.fscore, dev_uas, dev_las)
             print("Saving new best model to {}...".format(best_model_path))
             torch.save({
                 'spec': parser.spec,
                 'state_dict': parser.state_dict(),
-                'trainer' : trainer.state_dict(),
-                }, best_model_path + ".pt")
-
+                'trainer': trainer.state_dict(),
+            }, best_model_path + ".pt")
 
     for epoch in itertools.count(start=1):
         if args.epochs is not None and epoch > args.epochs:
             break
-        #check_dev(epoch)
+        # check_dev(epoch)
         np.random.shuffle(train_parse)
         epoch_start_time = time.time()
 
@@ -478,11 +493,14 @@ def run_train(args, hparams):
             parser.train()
 
             batch_loss_value = 0.0
-            batch_trees = train_parse[start_index:start_index + args.batch_size]
+            batch_trees = train_parse[start_index:start_index +
+                                      args.batch_size]
 
-            batch_sentences = [[(leaf.tag, leaf.word) for leaf in tree.leaves()] for tree in batch_trees]
+            batch_sentences = [[(leaf.tag, leaf.word)
+                                for leaf in tree.leaves()] for tree in batch_trees]
             for subbatch_sentences, subbatch_trees in parser.split_batch(batch_sentences, batch_trees, args.subbatch_max_tokens):
-                _, loss = parser.parse_batch(subbatch_sentences, subbatch_trees)
+                _, loss = parser.parse_batch(
+                    subbatch_sentences, subbatch_trees)
 
                 loss = loss / len(batch_trees)
                 loss_value = float(loss.data.cpu().numpy())
@@ -493,7 +511,8 @@ def run_train(args, hparams):
                 total_processed += len(subbatch_trees)
                 current_processed += len(subbatch_trees)
 
-            grad_norm = torch.nn.utils.clip_grad_norm_(clippable_parameters, grad_clip_threshold)
+            grad_norm = torch.nn.utils.clip_grad_norm_(
+                clippable_parameters, grad_clip_threshold)
 
             trainer.step()
 
@@ -525,6 +544,7 @@ def run_train(args, hparams):
             if (total_processed // args.batch_size + 1) > hparams.learning_rate_warmup_steps:
                 scheduler.step(best_dev_score)
 
+
 def run_test(args):
 
     const_test_path = args.consttest_ptb_path
@@ -536,7 +556,8 @@ def run_test(args):
         dep_test_path = args.deptest_ctb_path
 
     print("Loading model from {}...".format(args.model_path_base))
-    assert args.model_path_base.endswith(".pt"), "Only pytorch savefiles supported"
+    assert args.model_path_base.endswith(
+        ".pt"), "Only pytorch savefiles supported"
 
     info = torch_load(args.model_path_base)
     assert 'hparams' in info['spec'], "Older savefiles not supported"
@@ -558,7 +579,8 @@ def run_test(args):
         inst_size = test_inst.length()
         dep_test_lengs[cun] = inst_size
         sent = test_inst.sentence
-        dep_test_data.append((sent.words, test_inst.postags, test_inst.heads, test_inst.types))
+        dep_test_data.append(
+            (sent.words, test_inst.postags, test_inst.heads, test_inst.types))
         for i in range(inst_size):
             dep_test_headid[cun][i] = test_inst.heads[i]
         dep_test_type.append(test_inst.types)
@@ -571,7 +593,8 @@ def run_test(args):
     dep_test_reader.close()
 
     print("Loading test trees from {}...".format(const_test_path))
-    test_treebank = trees.load_trees(const_test_path, dep_test_headid, dep_test_type, dep_test_word)
+    test_treebank = trees.load_trees(
+        const_test_path, dep_test_headid, dep_test_type, dep_test_word)
     print("Loaded {:,} test examples.".format(len(test_treebank)))
 
     print("Parsing test sentences...")
@@ -582,9 +605,11 @@ def run_test(args):
     parser.eval()
     test_predicted = []
     for start_index in range(0, len(test_treebank), args.eval_batch_size):
-        subbatch_trees = test_treebank[start_index:start_index + args.eval_batch_size]
+        subbatch_trees = test_treebank[start_index:start_index +
+                                       args.eval_batch_size]
 
-        subbatch_sentences = [[(leaf.tag, leaf.word) for leaf in tree.leaves()] for tree in subbatch_trees]
+        subbatch_sentences = [[(leaf.tag, leaf.word)
+                               for leaf in tree.leaves()] for tree in subbatch_trees]
 
         predicted, _, = parser.parse_batch(subbatch_sentences)
         del _
@@ -599,8 +624,10 @@ def run_test(args):
         )
     )
 
-    test_pred_head = [[leaf.father for leaf in tree.leaves()] for tree in test_predicted]
-    test_pred_type = [[leaf.type for leaf in tree.leaves()] for tree in test_predicted]
+    test_pred_head = [[leaf.father for leaf in tree.leaves()]
+                      for tree in test_predicted]
+    test_pred_type = [[leaf.type for leaf in tree.leaves()]
+                      for tree in test_predicted]
     assert len(test_pred_head) == len(test_pred_type)
     assert len(test_pred_type) == len(dep_test_type)
     stats, stats_nopunc, stats_root, test_total_inst = dep_eval.eval(len(test_pred_head), dep_test_word, dep_test_pos,
@@ -617,8 +644,9 @@ def run_test(args):
         'best test W. Punct: ucorr: %d, lcorr: %d, total: %d, uas: %.2f%%, las: %.2f%%, ucm: %.2f%%, lcm: %.2f%%' % (
             test_ucorrect, test_lcorrect, test_total, test_ucorrect * 100 / test_total,
             test_lcorrect * 100 / test_total,
-            test_ucomlpete_match * 100 / test_total_inst, test_lcomplete_match * 100 / test_total_inst
-            ))
+            test_ucomlpete_match * 100 /
+            test_total_inst, test_lcomplete_match * 100 / test_total_inst
+        ))
     print(
         'best test Wo Punct: ucorr: %d, lcorr: %d, total: %d, uas: %.2f%%, las: %.2f%%, ucm: %.2f%%, lcm: %.2f%% ' % (
             test_ucorrect_nopunc, test_lcorrect_nopunc, test_total_nopunc,
@@ -631,10 +659,12 @@ def run_test(args):
     print(
         '============================================================================================================================')
 
+
 def run_parse(args):
 
     print("Loading model from {}...".format(args.model_path_base))
-    assert args.model_path_base.endswith(".pt"), "Only pytorch savefiles supported"
+    assert args.model_path_base.endswith(
+        ".pt"), "Only pytorch savefiles supported"
 
     info = torch_load(args.model_path_base)
     assert 'hparams' in info['spec'], "Older savefiles not supported"
@@ -645,12 +675,14 @@ def run_parse(args):
     with open(args.input_path) as input_file:
         sentences = input_file.readlines()
 
-    sentences = [sentence.strip() for sentence in sentences if len(sentence.strip()) > 0]
+    sentences = [sentence.strip()
+                 for sentence in sentences if len(sentence.strip()) > 0]
 
     if args.max_tokens > 0:
         tmp = []
         for sentence in sentences:
-            sub_sentences = [word_tokenize(sub_sentence) for sub_sentence in sent_tokenize(sentence)]
+            sub_sentences = [word_tokenize(sub_sentence)
+                             for sub_sentence in sent_tokenize(sentence)]
             this_sentence = sub_sentences[0][:args.max_tokens]
             this_idx = 1
             move_on = False
@@ -671,13 +703,16 @@ def run_parse(args):
             dummy_tag = parser.tag_vocab.value(0)
 
     def save_data(syntree_pred, cun):
-        pred_head = [[leaf.father for leaf in tree.leaves()] for tree in syntree_pred]
-        pred_type = [[leaf.type for leaf in tree.leaves()] for tree in syntree_pred]
+        pred_head = [[leaf.father for leaf in tree.leaves()]
+                     for tree in syntree_pred]
+        pred_type = [[leaf.type for leaf in tree.leaves()]
+                     for tree in syntree_pred]
         appent_string = "_" + str(cun) + ".txt"
         if args.output_path_synconst != '-':
             with open(args.output_path_synconst + appent_string, 'w') as output_file:
                 for tree in syntree_pred:
-                    output_file.write("{}\n".format(tree.convert().linearize()))
+                    output_file.write("{}\n".format(
+                        tree.convert().linearize()))
             print("Output written to:", args.output_path_synconst)
 
         if args.output_path_syndep != '-':
@@ -695,13 +730,17 @@ def run_parse(args):
     syntree_pred = []
     cun = 0
     for start_index in tqdm(range(0, len(sentences), args.eval_batch_size), desc='Parsing sentences'):
-        subbatch_sentences = sentences[start_index:start_index+args.eval_batch_size]
+        subbatch_sentences = sentences[start_index:start_index +
+                                       args.eval_batch_size]
         if args.pos_tag == 2:
-            tagged_sentences = [[(dummy_tag, REVERSE_TOKEN_MAPPING.get(word, word)) for word in word_tokenize(sentence)] for sentence in subbatch_sentences]
+            tagged_sentences = [[(dummy_tag, REVERSE_TOKEN_MAPPING.get(
+                word, word)) for word in word_tokenize(sentence)] for sentence in subbatch_sentences]
         elif args.pos_tag == 1:
-            tagged_sentences = [[(REVERSE_TOKEN_MAPPING.get(tag, tag), REVERSE_TOKEN_MAPPING.get(word, word)) for word, tag in nltk.pos_tag(word_tokenize(sentence))] for sentence in subbatch_sentences]
+            tagged_sentences = [[(REVERSE_TOKEN_MAPPING.get(tag, tag), REVERSE_TOKEN_MAPPING.get(
+                word, word)) for word, tag in nltk.pos_tag(word_tokenize(sentence))] for sentence in subbatch_sentences]
         else:
-            tagged_sentences = [[(REVERSE_TOKEN_MAPPING.get(word.split('_')[0],word.split('_')[0]), REVERSE_TOKEN_MAPPING.get(word.split('_')[1],word.split('_')[1])) for word in sentence.split()] for sentence in subbatch_sentences]
+            tagged_sentences = [[(REVERSE_TOKEN_MAPPING.get(word.split('_')[0], word.split('_')[0]), REVERSE_TOKEN_MAPPING.get(
+                word.split('_')[1], word.split('_')[1])) for word in sentence.split()] for sentence in subbatch_sentences]
         syntree, _ = parser.parse_batch(tagged_sentences)
         syntree_pred.extend(syntree)
         if args.save_per_sentences <= len(syntree_pred) and args.save_per_sentences > 0:
@@ -711,6 +750,7 @@ def run_parse(args):
 
     if 0 < len(syntree_pred):
         save_data(syntree_pred, cun)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -730,14 +770,18 @@ def main():
 
     subparser.add_argument("--dataset", default="ptb")
 
-    subparser.add_argument("--train-ptb-path", default="data/02-21.10way.clean")
+    subparser.add_argument(
+        "--train-ptb-path", default="data/02-21.10way.clean")
     subparser.add_argument("--dev-ptb-path", default="data/22.auto.clean")
-    subparser.add_argument("--dep-train-ptb-path", default="data/ptb_train_3.3.0.sd.clean")
-    subparser.add_argument("--dep-dev-ptb-path", default="data/ptb_dev_3.3.0.sd.clean")
+    subparser.add_argument("--dep-train-ptb-path",
+                           default="data/ptb_train_3.3.0.sd.clean")
+    subparser.add_argument("--dep-dev-ptb-path",
+                           default="data/ptb_dev_3.3.0.sd.clean")
 
     subparser.add_argument("--train-ctb-path", default="data/train_ctb.txt")
     subparser.add_argument("--dev-ctb-path", default="data/dev_ctb.txt")
-    subparser.add_argument("--dep-train-ctb-path", default="data/train_ctb.conll")
+    subparser.add_argument("--dep-train-ctb-path",
+                           default="data/train_ctb.conll")
     subparser.add_argument("--dep-dev-ctb-path", default="data/dev_ctb.conll")
 
     subparser.add_argument("--batch-size", type=int, default=250)
@@ -751,10 +795,13 @@ def main():
     subparser.set_defaults(callback=run_test)
     subparser.add_argument("--model-path-base", required=True)
     subparser.add_argument("--evalb-dir", default="EVALB/")
-    subparser.add_argument("--embedding-path", default="data/glove.6B.100d.txt.gz")
+    subparser.add_argument(
+        "--embedding-path", default="data/glove.6B.100d.txt.gz")
     subparser.add_argument("--dataset", default="ptb")
-    subparser.add_argument("--consttest-ptb-path", default="data/23.auto.clean")
-    subparser.add_argument("--deptest-ptb-path", default="data/ptb_test_3.3.0.sd.clean")
+    subparser.add_argument("--consttest-ptb-path",
+                           default="data/23.auto.clean")
+    subparser.add_argument("--deptest-ptb-path",
+                           default="data/ptb_test_3.3.0.sd.clean")
     subparser.add_argument("--consttest-ctb-path", default="data/test_ctb.txt")
     subparser.add_argument("--deptest-ctb-path", default="data/test_ctb.conll")
     subparser.add_argument("--eval-batch-size", type=int, default=100)
@@ -762,9 +809,12 @@ def main():
     subparser = subparsers.add_parser("parse")
     subparser.set_defaults(callback=run_parse)
     subparser.add_argument("--model-path-base", required=True)
-    subparser.add_argument("--contributions", type=int, default=1) # 1 to print contributions
-    subparser.add_argument("--pos-tag", type=int, default=1) # 1 to PoS-tag the input sentences, 2 for dummy tag
-    subparser.add_argument("--embedding-path", default="data/glove.6B.100d.txt.gz")
+    subparser.add_argument("--contributions", type=int,
+                           default=1)  # 1 to print contributions
+    # 1 to PoS-tag the input sentences, 2 for dummy tag
+    subparser.add_argument("--pos-tag", type=int, default=1)
+    subparser.add_argument(
+        "--embedding-path", default="data/glove.6B.100d.txt.gz")
     subparser.add_argument("--dataset", default="ptb")
     subparser.add_argument("--max-tokens", type=int, default=-1)
     subparser.add_argument("--save-per-sentences", type=int, default=-1)
@@ -776,6 +826,7 @@ def main():
 
     args = parser.parse_args()
     args.callback(args)
+
 
 # %%
 if __name__ == "__main__":

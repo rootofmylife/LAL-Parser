@@ -1,5 +1,6 @@
 class HParams():
     _skip_keys = ['populate_arguments', 'set_from_args', 'print', 'to_dict']
+
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -17,7 +18,7 @@ class HParams():
         for k in dir(self):
             if k.startswith('_') or k in self._skip_keys:
                 continue
-            res[k] =  self[k]
+            res[k] = self[k]
         return res
 
     def populate_arguments(self, parser):
