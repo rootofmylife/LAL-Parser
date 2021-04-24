@@ -189,7 +189,6 @@ def run_train(args, hparams):
             print("reading data: %d" % counter)
         sent = inst.sentence
         dep_data.append((sent.words, inst.postags, inst.heads, inst.types))
-        #dep_sentences.append([(tag, word) for i, (word, tag) in enumerate(zip(sent.words, sent.postags))])
         dep_sentences.append(sent.words)
         dep_heads.append(inst.heads)
         dep_types.append(inst.types)

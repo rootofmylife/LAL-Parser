@@ -1,6 +1,4 @@
 import collections.abc
-import gzip
-import numpy as np
 Sub_Head = "<H>"
 No_Head = "<N>"
 Htype = 1
