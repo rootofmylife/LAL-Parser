@@ -119,3 +119,7 @@ EVALB/evalb
 vtb_train_3.3.0.clean
 vtb_dev_3.3.0.clean
 vtb_test_3.3.0.clean
+*.sd
+data/cp_dev_vn.clean
+data/cp_test_vn.clean
+data/cp_train_vn.clean

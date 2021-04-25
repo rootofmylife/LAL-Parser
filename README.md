@@ -32,6 +32,14 @@ We provide the training script in `best_parser_training_script.sh`.
 
 Check the function `make_hparams` in `src_joint/main.py` for hyperparameters specific to the Label Attention Layer. For more training and evaluation instructions, see below.
 
+### Data
+
+The dependency structures are mainly obtained by converting constituent structure with version 3.3.0 of Stanford Parser in the data/ folder:
+
+```
+java -cp stanford-parser_3.3.0.jar edu.stanford.nlp.trees.EnglishGrammaticalStructure -basic -keepPunct -conllx -treeFile 02-21.10way.clean > ptb_train_3.3.0.sd
+```
+
 ### Training Instructions get from [the HPSG parser repository](https://github.com/DoodleJZ/HPSG-Neural-Parser)
 
 Some of the available arguments are:

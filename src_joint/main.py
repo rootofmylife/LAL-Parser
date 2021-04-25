@@ -288,8 +288,6 @@ def run_train(args, hparams):
 
     char_vocab = vocabulary.Vocabulary()
 
-    # char_vocab.index(tokens.CHAR_PAD)
-
     # If codepoints are small (e.g. Latin alphabet), index by codepoint directly
     highest_codepoint = max(ord(char) for char in char_set)
     if highest_codepoint < 512:
@@ -298,7 +296,6 @@ def run_train(args, hparams):
         else:
             highest_codepoint = 512
 
-        # This also takes care of constants like tokens.CHAR_PAD
         for codepoint in range(highest_codepoint):
             char_index = char_vocab.index(chr(codepoint))
             assert char_index == codepoint
@@ -481,7 +478,7 @@ def run_train(args, hparams):
     for epoch in itertools.count(start=1):
         if args.epochs is not None and epoch > args.epochs:
             break
-        # check_dev(epoch)
+
         np.random.shuffle(train_parse)
         epoch_start_time = time.time()
 

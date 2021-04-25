@@ -2,7 +2,6 @@
 python3 src_joint/main.py train \
  --model-path-base models/hpsg_vn \
  --epochs 100 \
- --use-xlnet \
  --use-tags \
  --const-lada 0.5 \
  --dataset ptb \
@@ -14,10 +13,10 @@ python3 src_joint/main.py train \
  --batch-size 100 \
  --eval-batch-size 20 \
  --subbatch-max-tokens 1000 \
- --train-ptb-path data/cp_train_vn.txt \
- --dev-ptb-path data/cp_dev_vn.txt \
- --dep-train-ptb-path data/vtb_train_3.3.0.clean \
- --dep-dev-ptb-path data/vtb_dev_3.3.0.clean \
+ --train-ptb-path data/cp_train_vn.clean \
+ --dev-ptb-path data/cp_dev_vn.clean \
+ --dep-train-ptb-path data/vtb_train_3.3.0.sd \
+ --dep-dev-ptb-path data/vtb_dev_3.3.0.sd \
  --lal-d-kv 128 \
  --lal-d-proj 128 \
  --no-lal-resdrop
