@@ -16,8 +16,8 @@ python3 src_joint/main.py train \
  --subbatch-max-tokens 1000 \
  --train-ptb-path data/cp_train_vn.txt \
  --dev-ptb-path data/cp_dev_vn.txt \
- --dep-train-ptb-path data/dp_train_vn.txt \
- --dep-dev-ptb-path data/dp_dev_vn.txt \
+ --dep-train-ptb-path data/vtb_train_3.3.0.clean \
+ --dep-dev-ptb-path data/vtb_dev_3.3.0.clean \
  --lal-d-kv 128 \
  --lal-d-proj 128 \
  --no-lal-resdrop
