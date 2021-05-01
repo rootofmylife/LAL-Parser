@@ -157,13 +157,7 @@ def run_train(args, hparams):
 
     dep_train_path = args.dep_train_ptb_path
     dep_dev_path = args.dep_dev_ptb_path
-
-    if hparams.dataset == 'ctb':
-        train_path = args.train_ctb_path
-        dev_path = args.dev_ctb_path
-
-        dep_train_path = args.dep_train_ctb_path
-        dep_dev_path = args.dep_dev_ctb_path
+    
 
     dep_reader = CoNLLXReader(dep_train_path)
     print('Reading dependency parsing data from %s' % dep_train_path)
@@ -757,8 +751,8 @@ def main():
     subparser.set_defaults(callback=lambda args: run_train(args, hparams))
     hparams.populate_arguments(subparser)
     subparser.add_argument("--numpy-seed", type=int)
-    subparser.add_argument("--model-path-base", required=True)
-    subparser.add_argument("--embedding-path", required=True)
+    subparser.add_argument("--model-path-base", default="models/hpsg_vn")
+    subparser.add_argument("--embedding-path", default="data/glove.gz")
     subparser.add_argument("--embedding-type", default="random")
 
     subparser.add_argument("--model-name", default="test")
@@ -766,19 +760,10 @@ def main():
 
     subparser.add_argument("--dataset", default="ptb")
 
-    subparser.add_argument(
-        "--train-ptb-path", default="data/02-21.10way.clean")
+    subparser.add_argument("--train-ptb-path", default="data/02-21.10way.clean")
     subparser.add_argument("--dev-ptb-path", default="data/22.auto.clean")
-    subparser.add_argument("--dep-train-ptb-path",
-                           default="data/ptb_train_3.3.0.sd.clean")
-    subparser.add_argument("--dep-dev-ptb-path",
-                           default="data/ptb_dev_3.3.0.sd.clean")
-
-    subparser.add_argument("--train-ctb-path", default="data/train_ctb.txt")
-    subparser.add_argument("--dev-ctb-path", default="data/dev_ctb.txt")
-    subparser.add_argument("--dep-train-ctb-path",
-                           default="data/train_ctb.conll")
-    subparser.add_argument("--dep-dev-ctb-path", default="data/dev_ctb.conll")
+    subparser.add_argument("--dep-train-ptb-path", default="data/ptb_train_3.3.0.sd.clean")
+    subparser.add_argument("--dep-dev-ptb-path", default="data/ptb_dev_3.3.0.sd.clean")
 
     subparser.add_argument("--batch-size", type=int, default=250)
     subparser.add_argument("--subbatch-max-tokens", type=int, default=2000)
@@ -791,13 +776,10 @@ def main():
     subparser.set_defaults(callback=run_test)
     subparser.add_argument("--model-path-base", required=True)
     subparser.add_argument("--evalb-dir", default="EVALB/")
-    subparser.add_argument(
-        "--embedding-path", default="data/glove.6B.100d.txt.gz")
+    subparser.add_argument("--embedding-path", default="data/glove.6B.100d.txt.gz")
     subparser.add_argument("--dataset", default="ptb")
-    subparser.add_argument("--consttest-ptb-path",
-                           default="data/23.auto.clean")
-    subparser.add_argument("--deptest-ptb-path",
-                           default="data/ptb_test_3.3.0.sd.clean")
+    subparser.add_argument("--consttest-ptb-path", default="data/23.auto.clean")
+    subparser.add_argument("--deptest-ptb-path", default="data/ptb_test_3.3.0.sd.clean")
     subparser.add_argument("--consttest-ctb-path", default="data/test_ctb.txt")
     subparser.add_argument("--deptest-ctb-path", default="data/test_ctb.conll")
     subparser.add_argument("--eval-batch-size", type=int, default=100)
@@ -805,12 +787,10 @@ def main():
     subparser = subparsers.add_parser("parse")
     subparser.set_defaults(callback=run_parse)
     subparser.add_argument("--model-path-base", required=True)
-    subparser.add_argument("--contributions", type=int,
-                           default=1)  # 1 to print contributions
+    subparser.add_argument("--contributions", type=int, default=1)  # 1 to print contributions
     # 1 to PoS-tag the input sentences, 2 for dummy tag
     subparser.add_argument("--pos-tag", type=int, default=1)
-    subparser.add_argument(
-        "--embedding-path", default="data/glove.6B.100d.txt.gz")
+    subparser.add_argument("--embedding-path", default="data/glove.6B.100d.txt.gz")
     subparser.add_argument("--dataset", default="ptb")
     subparser.add_argument("--max-tokens", type=int, default=-1)
     subparser.add_argument("--save-per-sentences", type=int, default=-1)
