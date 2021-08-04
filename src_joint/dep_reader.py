@@ -3,7 +3,6 @@ __author__ = 'max'
 import KM_parser
 tokens = KM_parser
 
-
 class Sentence(object):
     def __init__(self, words, postags):
         self.words = words
@@ -25,7 +24,7 @@ class DependencyInstance(object):
 
 
 class CoNLLXReader(object):
-    def __init__(self, file_path, type_vocab=None):
+    def __init__(self, file_path, type_vocab = None):
         self.__source_file = open(file_path, 'r')
         self.type_vocab = type_vocab
 

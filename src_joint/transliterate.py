@@ -125,6 +125,7 @@ HEBREW_UNESCAPE = {
 }
 
 
+
 def arabic(inp):
     """
     Undo Buckwalter transliteration
@@ -137,7 +138,6 @@ def arabic(inp):
     return "".join(
         BUCKWALTER_MAP.get(char, char)
         for char in BUCKWALTER_UNESCAPE.get(inp, inp))
-
 
 def hebrew(inp):
     """
@@ -154,7 +154,6 @@ def hebrew(inp):
     if out and (out[-1] in HEBREW_SUFFIX_MAP):
         out = out[:-1] + HEBREW_SUFFIX_MAP[out[-1]]
     return out
-
 
 TRANSLITERATIONS = {
     'arabic': arabic,

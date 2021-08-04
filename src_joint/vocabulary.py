@@ -1,6 +1,5 @@
 import collections
 
-
 class Vocabulary(object):
     def __init__(self):
         self.frozen = False
